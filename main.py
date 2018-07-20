@@ -7,6 +7,8 @@ def ask_quit():
         quit()
 
 if __name__ == "__main__":
+
+    delete_files()
     cg = Chess_Game(parser())
     
     root = Toplevel()

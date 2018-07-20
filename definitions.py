@@ -136,3 +136,11 @@ def parser():
 
     #print(args)
     return args
+
+def delete_files(path_list = ["Moves", "Graphs"]):
+    for path in tqdm(path_list):
+        fileList = os.listdir(path)
+        for fileName in fileList:
+            if fileName != ".gitkeep":
+                os.remove(path + '/' + fileName)
+    return

@@ -19,7 +19,7 @@ class Window(Frame):
 
         self.master.bind("<Right>", self.right_key)
         self.master.bind("<Left>", self.left_key)
-        self.game_len = len([name for name in os.listdir('Moves/')])
+        self.game_len = len([name for name in os.listdir('Moves/') if name[-4:] == ".png"])
 
     def right_key(self, event):
         self.showImg(1)

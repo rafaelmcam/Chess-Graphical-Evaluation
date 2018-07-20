@@ -2,5 +2,7 @@
 *.png
 *.json
 *.txt
+*.pgn
 
+!dumb.pgn
 !readme_png.png
