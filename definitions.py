@@ -24,7 +24,7 @@ class Chess_Game:
                 self.eng = []
                 self.jogo = []
 
-                self.game_analysis()
+                self.game_analysis("Moves")
                 #print(self.jogo)
                 self.game_lst()
                 self.num_scores_f()
@@ -49,7 +49,7 @@ class Chess_Game:
                 self.engine.position(self.board)
                 return
 
-        def game_analysis(self):
+        def game_analysis(self, folder):
                 print("Engine evaluation in progress...\n")
                 pbar = tqdm(self.game.main_line())
                 for move in pbar:
@@ -59,7 +59,7 @@ class Chess_Game:
                         self.engine.position(self.board)
                         eng_aux = self.engine.go(movetime = self.engine_time)
                         self.eng.append((self.board.san(eng_aux[0]), self.info_handler.info["depth"], self.info_handler.info["seldepth"]))
-                        svg2png(bytestring = chess.svg.board(board = self.board, size = 400, lastmove = move, check = self.check_f(), flipped = self.inverted), write_to="Moves/{}.png".format(self.ply))
+                        svg2png(bytestring = chess.svg.board(board = self.board, size = 400, lastmove = move, check = self.check_f(), flipped = self.inverted), write_to="{}/{}.png".format(folder, self.ply))
                         self.jogo.append((self.ply, self.san, self.info_handler.info["score"][1]))
                         self.ply += 1
                 return
@@ -109,9 +109,7 @@ class Chess_Game:
                 for x in tqdm(self.gm_lst):
                         t = list(range(1, len(self.num_scores[:ply])+1, 1))
                         plt.plot(t, self.num_scores[:ply], color='black', marker='o', markersize=1)
-                        if abs(max(self.num_scores[:ply], key=abs))<100:
-                                plt.ylim(-100, 100)
-                        elif abs(max(self.num_scores[:ply], key=abs))<300:
+                        if abs(max(self.num_scores[:ply], key=abs))<300:
                                 plt.ylim(-300, 300)
                         else:
                                 plt.ylim(-500, 500)

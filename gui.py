@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 import os
 #from definitions import *
@@ -36,12 +37,6 @@ class Window(Frame):
         file = Menu(menu)
         file.add_command(label = "Exit", command = self.client_exit)
         menu.add_cascade(label = "File", menu=file)
-
-        edit = Menu(menu)
-        edit.add_command(label="Next Image", command=self.showImg)
-        edit.add_command(label="Show Text", command=self.showTxt)
-        
-        menu.add_cascade(label = "Edit", menu=edit)
 
         #initial image
         load = Image.open("Moves/1.png")
@@ -82,19 +77,6 @@ class Window(Frame):
             else:
                 img.place(x=Graph_Im_Pos[0], y=Graph_Im_Pos[1])
             load.close()
-        # load = Image.open("Moves/{}.png".format(self.move_n))
-        # render = ImageTk.PhotoImage(load)
-
-        # img = Label(self, image=render)
-        # img.image = render
-        # img.place(x=Move_Im_Pos[0], y=Move_Im_Pos[1])
-
-        # load = Image.open("Graphs/{}.png".format(self.move_n))
-        # render = ImageTk.PhotoImage(load)
-
-        # img = Label(self, image=render)
-        # img.image = render
-        # img.place(x=400, y=30)
         return
 
     def showTxt(self):
@@ -103,9 +85,3 @@ class Window(Frame):
 
     def client_exit(self):
         exit()
-
-# root = Tk()
-# root.geometry("400x300")
-
-# app = Window(root)
-# root.mainloop()
