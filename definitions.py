@@ -5,8 +5,14 @@ import chess.svg
 import argparse
 import math
 import cairo
+import matplotlib.pyplot as plt
+import numpy as np
+import imageio
+import sys
+import os
 from cairosvg import svg2png
 from tqdm import tqdm
+#from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 class Chess_Game:
         def __init__(self, args):
@@ -15,6 +21,14 @@ class Chess_Game:
                 self.pgn_init()
                 self.game_init()
                 self.ply = 1
+                self.eng = []
+                self.jogo = []
+
+                self.game_analysis()
+                #print(self.jogo)
+                self.game_lst()
+                self.num_scores_f()
+                self.save_graphs("Graphs")
                 #delete file in previous folders
         def pgn_init(self):
                 pgn = open(self.pgn)
@@ -33,11 +47,8 @@ class Chess_Game:
                 self.engine.info_handlers.append(self.info_handler)
                 self.board = self.game.board()
                 self.engine.position(self.board)
-        #def move_game():
-                #return svg2png sem salvar e usar no tkinter depois
-                #ver como fazer pra voltar jogada
-                # usar board.pop?!
-                
+                return
+
         def game_analysis(self):
                 print("Engine evaluation in progress...\n")
                 pbar = tqdm(self.game.main_line())
@@ -46,9 +57,10 @@ class Chess_Game:
                         pbar.set_description("Evaluating {}{}{}".format(math.floor((self.ply+1)/2), '. ' if self.ply%2==1 else '...', self.san))
                         self.board.push(move)
                         self.engine.position(self.board)
-                        #depois botar a linha de baixo como self.my_image = x sem dar write_to e pegar
-                        #essa self.my_image e botar no tkinter
+                        eng_aux = self.engine.go(movetime = self.engine_time)
+                        self.eng.append((self.board.san(eng_aux[0]), self.info_handler.info["depth"], self.info_handler.info["seldepth"]))
                         svg2png(bytestring = chess.svg.board(board = self.board, size = 400, lastmove = move, check = self.check_f(), flipped = self.inverted), write_to="Moves/{}.png".format(self.ply))
+                        self.jogo.append((self.ply, self.san, self.info_handler.info["score"][1]))
                         self.ply += 1
                 return
         def check_f(self):
@@ -59,20 +71,57 @@ class Chess_Game:
                         else:
                                 self.checked_king_pos = self.board.king(0)
                 return
-        # def svgPhotoImage(self):
-        #         print(self.my_svg)
-        #         #svg2png(bytestring = self.my_svg, write_to = "teste.png")                     
-        #         surface = cairo.SVGSurface(aux, 400, 400)
-        #         context = cairo.Context(surface)
+        def game_lst(self):
+                self.gm_lst = []
+                for x in self.jogo:
+                        color = "White" if x[0]%2==1 else "Black"
+                        if x[2][1] == None:
+                                score = str(-x[2][0]) if color=="White" else str(x[2][0])
+                                if int(score)>=0:
+                                        score = "+" + score
+                        else:
+                                score = "{}{}{}".format('#', '-' if color=="Black" and x[2][1]<0 else '', abs(x[2][1]))
+                        if color == "White":
+                                nta = str(int(x[0]/2)+1) + ". " + str(x[1])
+                        else:
+                                nta = str(int(x[0]/2)) + "..." + str(x[1])
+                        self.gm_lst.append((x[0], color, nta, score))
+                return 
 
-        #         # use rsvg to render the cairo context                                      
-        #         handle = Rsvg.Handle()
-        #         svg = handle.new_from_data(self.my_svg.encode("utf-8"))
-        #         svg.render_cairo(context)
-
-        #         #img.write_to_png("svg.png")
-  
-        #         return aux
+        def num_scores_f(self):
+                self.num_scores = []
+                for x in self.gm_lst:
+                        if x[3][0]=='#':
+                                if x[3][1]=='-':
+                                        self.num_scores.append(-99999)
+                                else:
+                                        self.num_scores.append(+99999)
+                        else:
+                                self.num_scores.append(int(x[3]))
+                return
+        def save_graphs(self, folder):
+                print("Saving Graphs...")
+                ply =  1
+                #z = np.array([0 for x in range(len(self.num_scores))])
+                z = np.zeros(len(self.num_scores))
+                self.num_scores = np.array(self.num_scores)
+                plt.figure(figsize=(4.32, 2.88))
+                for x in tqdm(self.gm_lst):
+                        t = list(range(1, len(self.num_scores[:ply])+1, 1))
+                        plt.plot(t, self.num_scores[:ply], color='black', marker='o', markersize=1)
+                        if abs(max(self.num_scores[:ply], key=abs))<100:
+                                plt.ylim(-100, 100)
+                        elif abs(max(self.num_scores[:ply], key=abs))<300:
+                                plt.ylim(-300, 300)
+                        else:
+                                plt.ylim(-500, 500)
+                        plt.fill_between(t, self.num_scores[:ply], 0, where=self.num_scores[:ply] >= z[:ply], facecolor='blue', interpolate=True)
+                        plt.fill_between(t, self.num_scores[:ply], 0, where=self.num_scores[:ply] <= z[:ply], facecolor='red', interpolate=True)
+                        plt.xticks(np.arange(1, ply+1, 5) if ply>5 else np.arange(1, 5+1, 1))
+                        plt.title("Position after {}, Eval: {}".format(self.gm_lst[ply-1][2], self.num_scores[ply-1]))
+                        plt.savefig("{}/{}.png".format(folder, ply))
+                        ply += 1
+                return
 def parser():
     parser = argparse.ArgumentParser(description='Local Chess Graphical Evaluation')
     parser.add_argument('-p', metavar='pgn', default="dumb.pgn", help='PGN File to be analyzed')
