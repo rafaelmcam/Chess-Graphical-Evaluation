@@ -1,3 +1,6 @@
 *.pyc
 *.png
 *.json
+*.txt
+
+!readme_png.png

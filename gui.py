@@ -55,8 +55,8 @@ class Window(Frame):
         img.place(x=Graph_Im_Pos[0], y=Graph_Im_Pos[1])
         load.close()
 
-        B1 = Button(self.master, text = 'Previous picture', command = lambda: self.showImg(-1)).pack(side = LEFT)
-        B2 = Button(self.master, text = 'Next picture', command = lambda: self.showImg(1)).pack(side = LEFT)
+        B1 = Button(self.master, text = 'Previous move', command = lambda: self.showImg(-1)).pack(side = LEFT)
+        B2 = Button(self.master, text = 'Next move', command = lambda: self.showImg(1)).pack(side = LEFT)
         #quitButton = Button(self, text = "Quit", command = self.client_exit)
         #quitButton.place(x=0, y=0)
 
