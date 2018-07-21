@@ -35,14 +35,11 @@ class Chess_Game:
                 self.game = chess.pgn.read_game(pgn)
                 exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
                 pgn_string = self.game.accept(exporter)
-                #use import re later or read import chess doc.
-                self.Result = pgn_string[pgn_string.find("Result")+8:pgn_string.find("Result")+11]
-                self.wh = pgn_string[pgn_string.find("White"):].split("\"")[1]
-                self.bl = pgn_string[pgn_string.find("Black"):].split("\"")[1]
                 pgn.close()
                 return
         def game_init(self):
                 self.engine = chess.uci.popen_engine(self.engine_path)
+                self.engine.uci()
                 self.info_handler = chess.uci.InfoHandler()
                 self.engine.info_handlers.append(self.info_handler)
                 self.board = self.game.board()
@@ -108,15 +105,15 @@ class Chess_Game:
                 plt.figure(figsize=(4.32, 2.88))
                 for x in tqdm(self.gm_lst):
                         t = list(range(1, len(self.num_scores[:ply])+1, 1))
-                        plt.plot(t, self.num_scores[:ply], color='black', marker='o', markersize=1)
-                        if abs(max(self.num_scores[:ply], key=abs))<300:
-                                plt.ylim(-300, 300)
+                        plt.plot(t, self.num_scores[:ply]/100, color='black', marker='o', markersize=3)
+                        if abs(max(self.num_scores[:ply], key=abs))/100<300/100:
+                                plt.ylim(-300/100, 300/100)
                         else:
-                                plt.ylim(-500, 500)
-                        plt.fill_between(t, self.num_scores[:ply], 0, where=self.num_scores[:ply] >= z[:ply], facecolor='blue', interpolate=True)
-                        plt.fill_between(t, self.num_scores[:ply], 0, where=self.num_scores[:ply] <= z[:ply], facecolor='red', interpolate=True)
+                                plt.ylim(-500/100, 500/100)
+                        plt.fill_between(t, self.num_scores[:ply]/100, 0, where=self.num_scores[:ply] >= z[:ply], facecolor='blue', interpolate=True)
+                        plt.fill_between(t, self.num_scores[:ply]/100, 0, where=self.num_scores[:ply] <= z[:ply], facecolor='red', interpolate=True)
                         plt.xticks(np.arange(1, ply+1, 5) if ply>5 else np.arange(1, 5+1, 1))
-                        plt.title("Position after {}, Eval: {}".format(self.gm_lst[ply-1][2], self.num_scores[ply-1]))
+                        plt.title("Position after {}, Eval: {}".format(self.gm_lst[ply-1][2], self.num_scores[ply-1]/100))
                         plt.savefig("{}/{}.png".format(folder, ply))
                         ply += 1
                 return
@@ -138,9 +135,10 @@ def parser():
     return args
 
 def delete_files(path_list = ["Moves", "Graphs"]):
-    for path in tqdm(path_list):
-        fileList = os.listdir(path)
-        for fileName in fileList:
-            if fileName != ".gitkeep":
-                os.remove(path + '/' + fileName)
-    return
+        print("\nDeleting previous files...\n")
+        for path in tqdm(path_list):
+                fileList = os.listdir(path)
+                for fileName in fileList:
+                        if fileName != ".gitkeep":
+                                os.remove(path + '/' + fileName)
+        return
