@@ -2,7 +2,6 @@ from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 import os
-#from definitions import *
 
 Move_Im_Pos = (0, 30)
 Graph_Im_Pos = (410, 50)
@@ -22,9 +21,6 @@ class Window(Frame):
         self.master.bind("<Right>", self.right_key)
         self.master.bind("<Left>", self.left_key)
 
-        #self.tk_setPalette(background='#d9d9d9', activeForeground="blue2")
-        #print(self.cget('bg'))
-
     def right_key(self, event):
         self.showImg(1)
 
@@ -42,8 +38,6 @@ class Window(Frame):
         file.add_command(label = "Exit", command = self.client_exit)
         menu.add_cascade(label = "File", menu=file)
 
-        #initial image
-
         for x in ["Moves", "Graphs"]:
             load = Image.open("{}/1.png".format(x))
             render = ImageTk.PhotoImage(load)
@@ -58,15 +52,12 @@ class Window(Frame):
         
         B1 = Button(self.master, text = 'Previous move', command = lambda: self.showImg(-1)).pack(side = LEFT)
         B2 = Button(self.master, text = 'Next move', command = lambda: self.showImg(1)).pack(side = LEFT)
-        #quitButton = Button(self, text = "Quit", command = self.client_exit)
-        #quitButton.place(x=0, y=0)
 
     def showImg(self, delta):
         if delta == -1 and self.move_n == 1 or delta == 1 and self.move_n == self.game_len:
             return
-
         self.move_n += delta
-        
+
         for x in ["Moves", "Graphs"]:
             load = Image.open("{}/{}.png".format(x, self.move_n))
             render = ImageTk.PhotoImage(load)
@@ -96,8 +87,9 @@ class Window(Frame):
         text = Label(self, text="\"{}\" recommendation: {:4}{:5}\nDepth: {:3}\nSel. Depth: {:3}\n".format(self.cg.engine.name, str(int(self.move_n/2)+1) + ". " if self.move_n%2==0 else str(int(self.move_n/2 + 1)) + "..." , self.cg.eng[self.move_n-1][0], self.cg.eng[self.move_n-1][1], self.cg.eng[self.move_n-1][2]))
         text.place(x=Text_Pos[0], y=Text_Pos[1], anchor="center")
 
-        print(self.cg.gm_lst)
-        print(self.cg.eng)
+        if self.cg.print == True:
+            print(self.cg.gm_lst)
+            print(self.cg.eng)
 
     def client_exit(self):
         exit()

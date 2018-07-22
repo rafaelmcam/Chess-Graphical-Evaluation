@@ -12,24 +12,23 @@ import sys
 import os
 from cairosvg import svg2png
 from tqdm import tqdm
-#from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 class Chess_Game:
         def __init__(self, args):
-                self.pgn, self.inverted, self.engine_time, self.engine_path, self.gui_color = args.p, args.Inverted, args.et, args.ep, args.c
-                delete_files()
-                print("\nFile: {}\nInverted Board: {}\nEngine Evaluation Time: {}ms per move\nGUI Color: {}\nEngine Path: {}\n".format(self.pgn, self.inverted, self.engine_time, self.gui_color, self.engine_path))
+                self.pgn, self.inverted, self.engine_time, self.engine_path, self.gui_color, self.print = args.p, args.Inverted, args.et, args.ep, args.c, args.print
+                self.delete_files()
+                if self.print == True:
+                        print("\nFile: {}\nInverted Board: {}\nEngine Evaluation Time: {}ms per move\nGUI Color: {}\nEngine Path: {}\n".format(self.pgn, self.inverted, self.engine_time, self.gui_color, self.engine_path))
                 self.pgn_init()
                 self.game_init()
                 self.ply = 1
                 self.eng = []
                 self.jogo = []
                 self.game_analysis("Moves")
-                #print(self.jogo)
                 self.game_lst()
                 self.num_scores_f()
                 self.save_graphs("Graphs")
-                #delete file in previous folders
+
         def pgn_init(self):
                 pgn = open(self.pgn)
                 self.game = chess.pgn.read_game(pgn)
@@ -47,7 +46,8 @@ class Chess_Game:
                 return
 
         def game_analysis(self, folder):
-                print("Engine evaluation in progress...\n")
+                if self.print == True:
+                        print("Engine evaluation in progress...\n")
                 pbar = tqdm(self.game.main_line())
                 for move in pbar:
                         self.san = self.board.san(move)
@@ -60,6 +60,7 @@ class Chess_Game:
                         self.jogo.append((self.ply, self.san, self.info_handler.info["score"][1]))
                         self.ply += 1
                 return
+
         def check_f(self):
                 self.checked_king_pos = -1
                 if self.board.is_check():
@@ -68,6 +69,7 @@ class Chess_Game:
                         else:
                                 self.checked_king_pos = self.board.king(0)
                 return
+
         def game_lst(self):
                 self.gm_lst = []
                 for x in self.jogo:
@@ -97,9 +99,9 @@ class Chess_Game:
                                 self.num_scores.append(int(x[3]))
                 return
         def save_graphs(self, folder):
-                print("Saving Graphs...")
+                if self.print == True:
+                        print("Saving Graphs...")
                 ply =  1
-                #z = np.array([0 for x in range(len(self.num_scores))])
                 z = np.zeros(len(self.num_scores))
                 self.num_scores = np.array(self.num_scores)
                 fig = plt.figure(figsize=(4.32, 2.88))
@@ -120,24 +122,29 @@ class Chess_Game:
                         plt.savefig("{}/{}.png".format(folder, ply), facecolor=fig.get_facecolor(), edgecolor='none')
                         ply += 1
                 return
+
+        def delete_files(self, path_list = ["Moves", "Graphs"]):
+                if self.print == True:
+                        print("\nDeleting previous files...\n")
+                for path in tqdm(path_list):
+                        fileList = os.listdir(path)
+                        for fileName in fileList:
+                                if fileName != ".gitkeep":
+                                        os.remove(path + '/' + fileName)
+                return
+
 def parser():
-    parser = argparse.ArgumentParser(description='Local Chess Graphical Evaluation')
-    parser.add_argument('-p', metavar='pgn', default="dumb.pgn", help='PGN File to be analyzed')
-    parser.add_argument('-iv', dest='Inverted', action='store_true', help = 'Inverted board')
-    parser.set_defaults(Inverted = False)
-    parser.add_argument('-et', metavar='engine time', type = int, default = 2000, help='Engine evaluation time in milisseconds')
-    parser.add_argument('-ep', metavar='engine path', type = str,default = "stockfish", help='Path to local engine')
-    parser.add_argument('-c', metavar='GUI colors', type = str,default = "#d9d9d9", help='GUI Window color given in Hex (Default: "#d9d9d9")')
-    args = parser.parse_args() 
+        parser = argparse.ArgumentParser(description='Local Chess Graphical Evaluation')
+        parser.add_argument('-p', metavar='pgn', default="dumb.pgn", help='PGN File to be analyzed')
+        parser.add_argument('-iv', dest='Inverted', action='store_true', help = 'Inverted board')
+        parser.add_argument('-et', metavar='engine time', type = int, default = 2000, help='Engine evaluation time in milisseconds')
+        parser.add_argument('-ep', metavar='engine path', type = str,default = "stockfish", help='Path to local engine')
+        parser.add_argument('-c', metavar='GUI colors', type = str,default = "#d9d9d9", help='GUI Window color given in Hex (Default: "#d9d9d9")')
+        parser.add_argument('--verbose', dest = "print" , action = 'store_true', help="Print analysis to terminal")
+        parser.set_defaults(Inverted = False, print = False)
 
-    #print(args)
-    return args
+        args = parser.parse_args() 
 
-def delete_files(path_list = ["Moves", "Graphs"]):
-        print("\nDeleting previous files...\n")
-        for path in tqdm(path_list):
-                fileList = os.listdir(path)
-                for fileName in fileList:
-                        if fileName != ".gitkeep":
-                                os.remove(path + '/' + fileName)
-        return
+        if args.print == True:
+                print(args)
+        return args
