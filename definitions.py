@@ -16,14 +16,14 @@ from tqdm import tqdm
 
 class Chess_Game:
         def __init__(self, args):
-                self.pgn, self.inverted, self.engine_time, self.gif_time, self.engine_path = args.p, args.Inverted, args.et, args.gt, args.ep
-                print("\nFile: {}\nInverted Board: {}\nEngine Evaluation Time: {}ms per move\nGif Interval: {}s\nEngine Path: {}\n".format(self.pgn, self.inverted, self.engine_time, self.gif_time, self.engine_path))
+                self.pgn, self.inverted, self.engine_time, self.engine_path, self.gui_color = args.p, args.Inverted, args.et, args.ep, args.c
+                delete_files()
+                print("\nFile: {}\nInverted Board: {}\nEngine Evaluation Time: {}ms per move\nGUI Color: {}\nEngine Path: {}\n".format(self.pgn, self.inverted, self.engine_time, self.gui_color, self.engine_path))
                 self.pgn_init()
                 self.game_init()
                 self.ply = 1
                 self.eng = []
                 self.jogo = []
-
                 self.game_analysis("Moves")
                 #print(self.jogo)
                 self.game_lst()
@@ -102,10 +102,13 @@ class Chess_Game:
                 #z = np.array([0 for x in range(len(self.num_scores))])
                 z = np.zeros(len(self.num_scores))
                 self.num_scores = np.array(self.num_scores)
-                plt.figure(figsize=(4.32, 2.88))
+                fig = plt.figure(figsize=(4.32, 2.88))
+                ax = fig.add_subplot(111)
+                ax.set_facecolor(self.gui_color)
+                fig.patch.set_facecolor(self.gui_color) 
                 for x in tqdm(self.gm_lst):
                         t = list(range(1, len(self.num_scores[:ply])+1, 1))
-                        plt.plot(t, self.num_scores[:ply]/100, color='black', marker='o', markersize=3)
+                        plt.plot(t, self.num_scores[:ply]/100, color='black', marker='o', markersize=2)
                         if abs(max(self.num_scores[:ply], key=abs))/100<300/100:
                                 plt.ylim(-300/100, 300/100)
                         else:
@@ -114,21 +117,17 @@ class Chess_Game:
                         plt.fill_between(t, self.num_scores[:ply]/100, 0, where=self.num_scores[:ply] <= z[:ply], facecolor='red', interpolate=True)
                         plt.xticks(np.arange(1, ply+1, 5) if ply>5 else np.arange(1, 5+1, 1))
                         plt.title("Position after {}, Eval: {}".format(self.gm_lst[ply-1][2], self.num_scores[ply-1]/100))
-                        plt.savefig("{}/{}.png".format(folder, ply))
+                        plt.savefig("{}/{}.png".format(folder, ply), facecolor=fig.get_facecolor(), edgecolor='none')
                         ply += 1
                 return
 def parser():
     parser = argparse.ArgumentParser(description='Local Chess Graphical Evaluation')
     parser.add_argument('-p', metavar='pgn', default="dumb.pgn", help='PGN File to be analyzed')
-    parser.add_argument('-iv', dest='Inverted', action='store_true', \
-            help = 'Inverted board')
+    parser.add_argument('-iv', dest='Inverted', action='store_true', help = 'Inverted board')
     parser.set_defaults(Inverted = False)
-    parser.add_argument('-et', metavar='engine time', type = int, \
-            default = 2000, help='Engine evaluation time in milisseconds')
-    parser.add_argument('-gt', metavar='gif speed', type = float, \
-            default = 1.0, help='Gif speed in seconds')
-    parser.add_argument('-ep', metavar='engine path', type = str, \
-            default = "stockfish", help='Path to local engine')
+    parser.add_argument('-et', metavar='engine time', type = int, default = 2000, help='Engine evaluation time in milisseconds')
+    parser.add_argument('-ep', metavar='engine path', type = str,default = "stockfish", help='Path to local engine')
+    parser.add_argument('-c', metavar='GUI colors', type = str,default = "#d9d9d9", help='GUI Window color given in Hex (Default: "#d9d9d9")')
     args = parser.parse_args() 
 
     #print(args)

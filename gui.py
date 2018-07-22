@@ -22,6 +22,9 @@ class Window(Frame):
         self.master.bind("<Right>", self.right_key)
         self.master.bind("<Left>", self.left_key)
 
+        #self.tk_setPalette(background='#d9d9d9', activeForeground="blue2")
+        #print(self.cget('bg'))
+
     def right_key(self, event):
         self.showImg(1)
 
@@ -85,6 +88,7 @@ class Window(Frame):
         self.cg = cg
         self.game_len = len(self.cg.gm_lst)
 
+        self.tk_setPalette(background=self.cg.gui_color, activeForeground="blue2")
         #initial texts
         text = Label(self, text="{} - {} ({})".format(self.cg.game.headers["White"], self.cg.game.headers["Black"], self.cg.game.headers["Result"]))
         text.place(x=Player_Text_Pos[0], y=Player_Text_Pos[1], anchor="center")

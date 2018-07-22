@@ -8,7 +8,6 @@ def ask_quit():
         
 if __name__ == "__main__":
 
-    delete_files()
     cg = Chess_Game(parser())
     
     #print(cg.gm_lst)
@@ -17,6 +16,7 @@ if __name__ == "__main__":
     root = Toplevel()
 
     app = Window(root)
+
     app.game_info(cg)
     
     root.protocol("WM_DELETE_WINDOW", ask_quit)
