@@ -12,13 +12,16 @@ import sys
 import os
 from cairosvg import svg2png
 from tqdm import tqdm
+from main import eng_PATH, gui_COLOR
 
 class Chess_Game:
         def __init__(self, args):
-                self.pgn, self.inverted, self.engine_time, self.engine_path, self.gui_color, self.print = args.p, args.Inverted, args.et, args.ep, args.c, args.print
+                self.pgn, self.inverted, self.engine_time, self.engine_path, self.gui_color, self.print = args.p, args.Inverted, args.et, eng_PATH, gui_COLOR, args.print
+
                 self.delete_files()
-                if self.print == True:
-                        print("\nFile: {}\nInverted Board: {}\nEngine Evaluation Time: {}ms per move\nGUI Color: {}\nEngine Path: {}\n".format(self.pgn, self.inverted, self.engine_time, self.gui_color, self.engine_path))
+
+                self.vprint("\nFile: {}\nInverted Board: {}\nEngine Evaluation Time: {}ms per move\nGUI Color: {}\nEngine Path: {}\n".format(self.pgn, self.inverted, self.engine_time, self.gui_color, self.engine_path))
+
                 self.pgn_init()
                 self.game_init()
                 self.ply = 1
@@ -46,19 +49,19 @@ class Chess_Game:
                 return
 
         def game_analysis(self, folder):
-                if self.print == True:
-                        print("Engine evaluation in progress...\n")
-                pbar = tqdm(self.game.main_line())
-                for move in pbar:
-                        self.san = self.board.san(move)
-                        pbar.set_description("Evaluating {}{}{}".format(math.floor((self.ply+1)/2), '. ' if self.ply%2==1 else '...', self.san))
-                        self.board.push(move)
-                        self.engine.position(self.board)
-                        eng_aux = self.engine.go(movetime = self.engine_time)
-                        self.eng.append((self.board.san(eng_aux[0]), self.info_handler.info["depth"], self.info_handler.info["seldepth"]))
-                        svg2png(bytestring = chess.svg.board(board = self.board, size = 400, lastmove = move, check = self.check_f(), flipped = self.inverted), write_to="{}/{}.png".format(folder, self.ply))
-                        self.jogo.append((self.ply, self.san, self.info_handler.info["score"][1]))
-                        self.ply += 1
+                self.vprint("Engine evaluation in progress...\n")
+                with tqdm(total = len([x for x in self.game.main_line()])) as pbar:
+                        for move in self.game.main_line():
+                                self.san = self.board.san(move)
+                                pbar.set_description("Evaluating {:3}{:4}{:5}".format(math.floor((self.ply+1)/2), '. ' if self.ply%2==1 else '...', self.san))
+                                self.board.push(move)
+                                self.engine.position(self.board)
+                                eng_aux = self.engine.go(movetime = self.engine_time)
+                                self.eng.append((self.board.san(eng_aux[0]), self.info_handler.info["depth"], self.info_handler.info["seldepth"]))
+                                svg2png(bytestring = chess.svg.board(board = self.board, size = 400, lastmove = move, check = self.check_f(), flipped = self.inverted), write_to="{}/{}.png".format(folder, self.ply))
+                                self.jogo.append((self.ply, self.san, self.info_handler.info["score"][1]))
+                                self.ply += 1
+                                pbar.update(1)
                 return
 
         def check_f(self):
@@ -99,8 +102,7 @@ class Chess_Game:
                                 self.num_scores.append(int(x[3]))
                 return
         def save_graphs(self, folder):
-                if self.print == True:
-                        print("Saving Graphs...")
+                self.vprint("Saving Graphs...")
                 ply =  1
                 z = np.zeros(len(self.num_scores))
                 self.num_scores = np.array(self.num_scores)
@@ -124,22 +126,23 @@ class Chess_Game:
                 return
 
         def delete_files(self, path_list = ["Moves", "Graphs"]):
-                if self.print == True:
-                        print("\nDeleting previous files...\n")
+                self.vprint("\nDeleting previous files...\n")
                 for path in tqdm(path_list):
                         fileList = os.listdir(path)
                         for fileName in fileList:
                                 if fileName != ".gitkeep":
                                         os.remove(path + '/' + fileName)
                 return
+        
+        def vprint(self, text):
+                if self.print:
+                        print(text)
 
 def parser():
         parser = argparse.ArgumentParser(description='Local Chess Graphical Evaluation')
-        parser.add_argument('-p', metavar='pgn', default="dumb.pgn", help='PGN File to be analyzed')
+        parser.add_argument('p', metavar='pgn', help='PGN File to be analyzed')
         parser.add_argument('-iv', dest='Inverted', action='store_true', help = 'Inverted board')
         parser.add_argument('-et', metavar='engine time', type = int, default = 2000, help='Engine evaluation time in milisseconds')
-        parser.add_argument('-ep', metavar='engine path', type = str,default = "stockfish", help='Path to local engine')
-        parser.add_argument('-c', metavar='GUI colors', type = str,default = "#d9d9d9", help='GUI Window color given in Hex (Default: "#d9d9d9")')
         parser.add_argument('--verbose', dest = "print" , action = 'store_true', help="Print analysis to terminal")
         parser.set_defaults(Inverted = False, print = False)
 
