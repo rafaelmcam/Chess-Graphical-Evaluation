@@ -3,6 +3,8 @@
 *.json
 *.txt
 *.pgn
+*.ipynb
+*.pkl
 
 !dumb.pgn
 !readme_png.png

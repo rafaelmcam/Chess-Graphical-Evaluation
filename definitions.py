@@ -27,10 +27,12 @@ class Chess_Game:
                 self.ply = 1
                 self.eng = []
                 self.jogo = []
+                self.lst_colors = []
                 self.game_analysis("Moves")
                 self.game_lst()
                 self.num_scores_f()
                 self.save_graphs("Graphs")
+                self.f_lst_colors()
 
         def pgn_init(self):
                 pgn = open(self.pgn)
@@ -124,6 +126,30 @@ class Chess_Game:
                         plt.savefig("{}/{}.png".format(folder, ply), facecolor=fig.get_facecolor(), edgecolor='none')
                         ply += 1
                 return
+        
+        def f_lst_colors(self):
+                prev = 0
+                for x in self.num_scores:
+                        r = int(x)-int(prev)
+                        self.lst_colors.append(r)
+                        prev = int(x)
+                self.vprint("\nLST_COLORS:")
+                self.vprint(self.lst_colors)
+                return
+
+        #temporariamente
+        def color_spectrum(self, r, i):
+                if i%2==0:
+                        if r > -30:
+                                c = "blue"
+                        else:
+                                c = "red"
+                else:
+                        if r > 30:
+                                c = "red"
+                        else:
+                                c = "blue"
+                return c
 
         def delete_files(self, path_list = ["Moves", "Graphs"]):
                 self.vprint("\nDeleting previous files...\n")
@@ -142,7 +168,7 @@ def parser():
         parser = argparse.ArgumentParser(description='Local Chess Graphical Evaluation')
         parser.add_argument('p', metavar='pgn', help='PGN File to be analyzed')
         parser.add_argument('-iv', dest='Inverted', action='store_true', help = 'Inverted board')
-        parser.add_argument('-et', metavar='engine time', type = int, default = 2000, help='Engine evaluation time in milisseconds')
+        parser.add_argument('-et', metavar='engine time', type = int, default = 2000, help='Engine evaluation time in milisseconds per move')
         parser.add_argument('--verbose', dest = "print" , action = 'store_true', help="Print analysis to terminal")
         parser.set_defaults(Inverted = False, print = False)
 

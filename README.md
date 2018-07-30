@@ -24,6 +24,6 @@ $python3 main.py
 
 **Custom PGN's Example**
 
-$python3 main.py -et 1000 -p "custom.pgn"
+$python3 main.py -et 1000 --verbose custom.pgn
 
 
