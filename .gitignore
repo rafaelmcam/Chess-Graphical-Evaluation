@@ -6,5 +6,6 @@
 *.ipynb
 *.pkl
 
+!requirements.txt
 !dumb.pgn
 !readme_png.png

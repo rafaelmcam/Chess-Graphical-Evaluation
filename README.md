@@ -12,6 +12,8 @@ sudo pip3 install -r requirements.txt
 
 sudo apt install python3-tk
 
+sudo apt install python3-pil.imagetk
+
 sudo apt install stockfish
 
 # Usage
